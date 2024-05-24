@@ -19,7 +19,8 @@ enum MAPBOOL {
     FLOOR,
     CHERRY,
     SNAKE,
-    HEAD
+    HEAD,
+    TAIL
 };
 
 bool quit(0); // main loop wheather quit
@@ -28,6 +29,7 @@ Uint pretick(0); // ticks sinse program starting
 
 int mapbool[16][12]; // exist infomation
 int mapto[16][12]; // facing infomation
+int mapfrom[16][12]; // follow this way, the head could find the tail
 
 void initSnake(); // init map and original snake
 void paintMap(); // paint on renderer based on mapbool and mapto
@@ -58,14 +60,23 @@ struct integerPos
     void sitDown(int type){
         mapbool[x][y]=type;
     }
-    void pointOutDirection(int direction){
+    void pointOutDirectionOfMapto(int direction){
         mapto[x][y]=direction;
+    }
+    void pointOutDirectionOfMapfrom(int oppositeDirection){ // ATTENEION:use the opposite direction
+        mapfrom[x][y]=(oppositeDirection+180)%360;
     }
     void nextStep(){
         if (mapto[x][y] == UP)         this->up();
         else if (mapto[x][y] == DOWN)  this->down();
         else if (mapto[x][y] == LEFT)  this->left();
         else if (mapto[x][y] == RIGHT) this->right();
+    }
+    void beforeStep(){
+        if (mapfrom[x][y] == UP)         this->up();
+        else if (mapfrom[x][y] == DOWN)  this->down();
+        else if (mapfrom[x][y] == LEFT)  this->left();
+        else if (mapfrom[x][y] == RIGHT) this->right();
     }
 };
 
@@ -96,22 +107,28 @@ int main()
             paintMap();
             if (pretick % 5 == 0 and gameover == 0){
                 headPosition.sitDown(SNAKE);
-                headPosition.pointOutDirection(nowDirection);
+                headPosition.pointOutDirectionOfMapto(nowDirection);
                 headPosition.nextStep();
                 alreadyNextStep = 1;
-                headPosition.pointOutDirection(nowDirection);
-                if (mapbool[headPosition.x][headPosition.y]==SNAKE)
-                {
+                headPosition.pointOutDirectionOfMapto(nowDirection);
+                
+                // this input is opposite direction of the value in "mapfrom"
+                headPosition.pointOutDirectionOfMapfrom(nowDirection);
+                
+                if (mapbool[headPosition.x][headPosition.y]==SNAKE or mapbool[headPosition.x][headPosition.y]==TAIL){
+                    // headPosition.beforeStep();
+                    
+                    // here is a question: if gameover here, head will eat a body.
                     gameover = 1;
                 }
-                    
-                if (mapbool[headPosition.x][headPosition.y]==CHERRY) {
-                    // graze ++;
+                else if (mapbool[headPosition.x][headPosition.y]==CHERRY) {
+                    // Use a function named "Eating"
                     makeCherry();
                 }
                 else {
                     tailPosition.leaveAway();
                     tailPosition.nextStep();
+                    tailPosition.sitDown(TAIL);
                 }
                 headPosition.sitDown(HEAD);
             }
@@ -126,6 +143,8 @@ int main()
              * 3.refresh renderer.
             */            
         }
+        // check the keyboard
+        // this can be another Function
         if (keyCooldown.ocheck())
         {
             if(!gameover)
@@ -156,6 +175,7 @@ int main()
             }
         }
         
+        // check wheather the mouse click the CROSS of the window
         while (SDL_PollEvent(&event) > 0) {
 			switch (event.type)
 			{
@@ -178,13 +198,15 @@ void initSnake() {
     // reset map infomation
 	memset(mapto,0,sizeof(mapto));
 	memset(mapbool,0,sizeof(mapbool));
-	mapbool[6][7] = SNAKE;
+	mapbool[6][7] = TAIL;
 	mapbool[6][8] = SNAKE;
 	mapbool[6][9] = HEAD;
 	mapto[6][7] = RIGHT;
 	mapto[6][8] = RIGHT;
     mapto[6][9] = RIGHT;
-
+    mapfrom[6][7] = LEFT;
+    mapfrom[6][8] = LEFT;
+    mapfrom[6][9] = LEFT;
     makeCherry();
 }
 
@@ -196,6 +218,7 @@ void paintMap() {
             switch (mapbool[i][j])
             {
                 case SNAKE:
+                    putImage(imageList[BODYIMAGE],onRenderer,mapfrom[i][j]);
                     putImage(imageList[BODYIMAGE],onRenderer,mapto[i][j]);
                     break;
                 case HEAD:
@@ -204,6 +227,8 @@ void paintMap() {
                 case CHERRY:
                     putImage(imageList[CHERRYIMAGE],onRenderer,mapto[i][j]);
                     break;
+                case TAIL:
+                    putImage(imageList[BODYIMAGE],onRenderer,mapto[i][j]);
                 default:
                     break;
             }
