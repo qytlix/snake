@@ -5,7 +5,6 @@
 #include "include/Keyboard.cpp"
 using namespace std;
 
-
 // every body and head face to.
 enum DIRECTION { 
     UP=0,
@@ -25,7 +24,7 @@ enum MAPBOOL {
 
 bool quit(0); // main loop wheather quit
 Uint pretick(0); // ticks sinse program starting
-
+int snakeLength(0); // the length of all snake ( exclude original 3 blocks )
 
 int mapbool[16][12]; // exist infomation
 int mapto[16][12]; // facing infomation
@@ -35,6 +34,9 @@ void initSnake(); // init map and original snake
 void paintMap(); // paint on renderer based on mapbool and mapto
 void makeCherry(); // make a cherry on the map
 int getrand(int min,int max); // get a random integer at [min, max]
+void eating(); // eating a cherry
+void printOutAll(); // this is for all print in the main loop
+
 struct integerPos
 {
     int x,y;
@@ -63,7 +65,7 @@ struct integerPos
     void pointOutDirectionOfMapto(int direction){
         mapto[x][y]=direction;
     }
-    void pointOutDirectionOfMapfrom(int oppositeDirection){ // ATTENEION:use the opposite direction
+    void pointOutDirectionOfMapfrom(int oppositeDirection){ // ATTENTION:use the opposite direction
         mapfrom[x][y]=(oppositeDirection+180)%360;
     }
     void nextStep(){
@@ -93,7 +95,7 @@ int main()
     startListenKB();
 
     integerPos headPosition = {6,9},tailPosition = {6,7};
-    Timer keyCooldown = Timer(80);// the CD for press KB
+    Timer keyCooldown = Timer(80); // the CD for press KB
     
     int nowDirection = RIGHT;
     bool alreadyNextStep = 0;
@@ -104,7 +106,7 @@ int main()
             pretick ++;
             SDL_RenderPresent(renderer);
             SDL_RenderClear(renderer);
-            paintMap();
+            printOutAll();
             if (pretick % 5 == 0 and gameover == 0){
                 headPosition.sitDown(SNAKE);
                 headPosition.pointOutDirectionOfMapto(nowDirection);
@@ -122,7 +124,7 @@ int main()
                     gameover = 1;
                 }
                 else if (mapbool[headPosition.x][headPosition.y]==CHERRY) {
-                    // Use a function named "Eating"
+                    eating();
                     makeCherry();
                 }
                 else {
@@ -133,6 +135,7 @@ int main()
                 headPosition.sitDown(HEAD);
             }
             else if (gameover) {
+                putImage(imageList[HOVERIMAGE]); // when it died, the screen will be grow down
                 putImage(imageList[GAMEOVERIMAGE],{{400,250},275,400});
                 putImage(imageList[PRESSZIMAGE]  ,{{400,550},50,400});
             }
@@ -213,7 +216,9 @@ void initSnake() {
 void paintMap() {
     for (int i = 0; i < 16; i ++) {
         for (int j = 0; j < 12; j ++) {
-            Box onRenderer = {{18+j*36,18+i*36},18,18};
+            // 36 and 18 is for halflength and halfwidth, 21 is for background.
+            Box onRenderer = {{18+j*36+10,18+i*36+10},18,18};
+
             putImage(imageList[MAPIMAGE],onRenderer);
             switch (mapbool[i][j])
             {
@@ -235,8 +240,7 @@ void paintMap() {
         }
     }
 }
-int getrand(int min, int max)
-{
+int getrand(int min, int max) {
 	return ( rand() % (max - min + 1) ) + min ;
 }
 void makeCherry(){
@@ -247,4 +251,20 @@ void makeCherry(){
 	}
     mapto[cherryx][cherryy] = UP;
     mapbool[cherryx][cherryy] = CHERRY;
+}
+void eating() {
+    snakeLength ++;
+    /**
+     * here will be some additional thing:
+     * 1. the cherry will have "direction", eating it from different way will get different score and effect.
+     * 2. and so on.
+    */
+}
+void printOutAll() {
+    paintMap();
+
+    // Print length and score.
+    
+    // putImage(...);
+    // putNumber(int,point);
 }

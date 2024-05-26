@@ -14,9 +14,20 @@ enum IMAGELIST{
     BODYIMAGE, // snake's body
     MAPIMAGE,  // map floor
 	HOVERIMAGE, // a black with 0.5 alpha
-	CHERRYIMAGE,
-	GAMEOVERIMAGE,
-	PRESSZIMAGE,
+	CHERRYIMAGE, // an apple or a cherry 's image
+	GAMEOVERIMAGE, // include a "GAMEOVER"
+	PRESSZIMAGE, // include a "PRESS Z TO CONTINUE"
+	BACKGROUNDIMAGE, // background
+	NUMBER_0, // numbers
+	NUMBER_1,
+	NUMBER_2,
+	NUMBER_3,
+	NUMBER_4,
+	NUMBER_5,
+	NUMBER_6,
+	NUMBER_7,
+	NUMBER_8,
+	NUMBER_9,
     END
 };
 
@@ -31,7 +42,18 @@ const char *imageURLList[] = {
 	"./image/hover.png",
 	"./image/cherry.png",
 	"./image/gameover.png",
-	"./image/pressZ.png"};
+	"./image/pressZ.png",
+	"./image/bg.png",
+	"./image/0.png",
+	"./image/1.png",
+	"./image/2.png",
+	"./image/3.png",
+	"./image/4.png",
+	"./image/5.png",
+	"./image/6.png",
+	"./image/7.png",
+	"./image/8.png",
+	"./image/9.png"};
 const int WINDOW_WIDTH = 800, WINDOW_HEIGHT = 600;
 
 SDL_Texture * getImage(const char * URL);
@@ -58,6 +80,10 @@ void putImage(SDL_Texture *texture, Box onRenderer = { {0,0},-1,-1 }, double ang
 void loadImages();
 void destoryImages();
 
+/**
+ * put an integer on the "point", the point is for the most left picture's centre
+*/
+void putNumber(int,point);
 
 SDL_Rect transform(Box box) {
     SDL_Rect rect = {
@@ -148,4 +174,27 @@ void destoryImages() {
         imageList[i] = nullptr;
     }
 }
+
+// ATTENTION : this function have not checked its correctness, may have some bugs.
+
+const int numberWidth  = 10; // temporary number
+const int numberHeight = 10; // temporary number
+
+void putNumber(int n, point pos) {
+	int digits[10]={0};
+	int highestDigit(0);
+	for(int i = 0; i < 10; i ++) {
+		digits[i] = (n%10);
+		n /= 10;
+		if(digits[i]) {
+			highestDigit = i;
+		}
+	}
+	for(int i = highestDigit; i >= 0; i --) {
+		Box onRenderer = {pos, numberWidth/2, numberHeight/2};
+		putImage(imageList[digits[i]+8],onRenderer);
+		pos = pos + (point){numberWidth,0};
+	}
+}
+
 #endif 
