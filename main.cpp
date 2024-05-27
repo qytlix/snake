@@ -136,7 +136,13 @@ int main()
             }
             else if (gameover) {
                 putImage(imageList[HOVERIMAGE]); // when it died, the screen will be grow down
-                putImage(imageList[GAMEOVERIMAGE],{{400,250},275,400});
+                
+                // let "GAMEOVER" flash
+                if((pretick/25)%2) {
+                    putImage(imageList[GAMEOVERIMAGE],{{400,250},275,400});
+                }
+                
+                
                 putImage(imageList[PRESSZIMAGE]  ,{{400,550},50,400});
             }
             /**
@@ -261,10 +267,21 @@ void eating() {
     */
 }
 void printOutAll() {
+    // paint bg
+    // what a abstruct background!!
+    /**
+     * background infomation:
+     * drawed by qytlix
+     * date:2024-05-27
+     * the sourse file is in the same folder ( bg.kra ), you can use Krita open it.
+    */
+    putImage(imageList[BACKGROUNDIMAGE]);
+
+    // print map
     paintMap();
 
     // Print length and score.
     
     // putImage(...);
-    // putNumber(int,point);
+    putNumber(snakeLength, {500,150});
 }

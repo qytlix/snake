@@ -177,8 +177,8 @@ void destoryImages() {
 
 // ATTENTION : this function have not checked its correctness, may have some bugs.
 
-const int numberWidth  = 10; // temporary number
-const int numberHeight = 10; // temporary number
+const int numberWidth  = 48 /*pixel*/; // temporary number
+const int numberHeight = 64 /*pixel*/; // temporary number
 
 void putNumber(int n, point pos) {
 	int digits[10]={0};
@@ -191,7 +191,7 @@ void putNumber(int n, point pos) {
 		}
 	}
 	for(int i = highestDigit; i >= 0; i --) {
-		Box onRenderer = {pos, numberWidth/2, numberHeight/2};
+		Box onRenderer = {pos, numberHeight/2, numberWidth/2};
 		putImage(imageList[digits[i]+8],onRenderer);
 		pos = pos + (point){numberWidth,0};
 	}
